@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="132" height="46" viewBox="0 0 132 46" fill="none" role="img" aria-label="Datour">
+  <title>Datour</title>
+  <text x="0" y="35" font-family="Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-weight="700" font-size="34" letter-spacing="-1" fill="#252525">Dat</text>
+  <g transform="translate(57 11) scale(0.78)" fill="#1F7A6D">
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M12 1C6 1 1.5 5.5 1.5 11.5 1.5 19 12 31 12 31S22.5 19 22.5 11.5C22.5 5.5 18 1 12 1ZM12 7.5a4 4 0 1 0 0 8 4 4 0 1 0 0-8Z"/>
+  </g>
+  <text x="78" y="35" font-family="Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-weight="700" font-size="34" letter-spacing="-1" fill="#252525">ur</text>
+</svg>
