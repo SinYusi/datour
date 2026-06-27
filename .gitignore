@@ -45,3 +45,6 @@ CLAUDE.md
 PLAN.md
 /prompts/
 course-test.mjs
+
+# claude code (local-only subagents)
+/.claude/agents/
