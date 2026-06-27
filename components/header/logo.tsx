@@ -14,7 +14,7 @@ export function Logo() {
         Dat
         <MapPin
           size={14}
-          className="mx-px translate-y-0.5 text-brand dark:text-[#2BA888]"
+          className="mx-px translate-y-0.5 text-brand-text"
         />
         ur
       </span>
