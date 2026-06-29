@@ -5,12 +5,15 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { StepProgress } from "./_components/step-progress";
+import { RegionStep } from "./_components/region-step";
+import type { Region } from "@/lib/regions";
 
 const TOTAL_STEPS = 2;
 
 export default function CreatePage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
+  const [region, setRegion] = useState<Region | null>(null);
 
   // 뒤로가기: 2단계 이상이면 이전 단계로, 1단계면 홈으로.
   const handleBack = () => {
@@ -38,16 +41,7 @@ export default function CreatePage() {
           {step} / {TOTAL_STEPS}
         </p>
         {step === 1 ? (
-          <div className="mt-2 flex flex-1 flex-col">
-            <h1 className="text-[23px] leading-[1.3] font-bold tracking-[-0.02em] text-foreground">
-              어디서
-              <br />
-              만날까요?
-            </h1>
-            <p className="mt-6 text-sm text-muted-foreground">
-              (지역 선택 — 다음 커밋)
-            </p>
-          </div>
+          <RegionStep selected={region} onSelect={setRegion} />
         ) : (
           <div className="mt-2 flex flex-1 flex-col">
             <h1 className="text-[23px] leading-[1.3] font-bold tracking-[-0.02em] text-foreground">
@@ -66,7 +60,8 @@ export default function CreatePage() {
         <button
           type="button"
           onClick={() => setStep(2)}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand py-4 text-sm font-semibold text-brand-fg transition-colors hover:bg-brand-hover active:bg-brand-active focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+          disabled={!region}
+          className="flex w-full items-center justify-center gap-2 rounded-xl py-4 text-sm font-semibold transition-colors bg-brand text-brand-fg hover:bg-brand-hover active:bg-brand-active focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:bg-brand-disabled disabled:text-brand-disabled-fg disabled:hover:bg-brand-disabled"
         >
           다음
           <ArrowRight className="size-[18px]" />
