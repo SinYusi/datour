@@ -4,12 +4,19 @@ import { getRegionById } from "@/lib/regions";
 import { getMoodById } from "@/lib/moods";
 
 interface ResultPageProps {
-  searchParams: Promise<{ region?: string; moods?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+
+// 중복 쿼리 키는 배열로 들어올 수 있어 첫 값으로 정규화한다.
+function first(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
 }
 
 // 코스 생성·지도 렌더는 다음 슬라이스. 지금은 전달된 입력값만 확인한다.
 export default async function ResultPage({ searchParams }: ResultPageProps) {
-  const { region: regionId, moods: moodsParam } = await searchParams;
+  const sp = await searchParams;
+  const regionId = first(sp.region);
+  const moodsParam = first(sp.moods);
   const region = regionId ? getRegionById(regionId) : undefined;
   const moodLabels = (moodsParam ? moodsParam.split(",") : [])
     .map((id) => getMoodById(id)?.label)
