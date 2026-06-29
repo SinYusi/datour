@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { AnimatePresence, motion } from "motion/react";
 import { ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { StepProgress } from "./_components/step-progress";
@@ -57,15 +58,26 @@ export default function CreatePage() {
         <ThemeToggle />
       </div>
 
-      <div className="flex flex-1 flex-col pt-7">
-        <p className="text-xs font-medium text-brand-text">
-          {step} / {TOTAL_STEPS}
-        </p>
-        {step === 1 ? (
-          <RegionStep selected={region} onSelect={setRegion} />
-        ) : (
-          <MoodStep selected={moods} onToggle={toggleMood} />
-        )}
+      <div className="flex flex-1 flex-col overflow-hidden pt-7">
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={step}
+            initial={{ opacity: 0, x: 16 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -16 }}
+            transition={{ duration: 0.22, ease: "easeOut" }}
+            className="flex flex-1 flex-col"
+          >
+            <p className="text-xs font-medium text-brand-text">
+              {step} / {TOTAL_STEPS}
+            </p>
+            {step === 1 ? (
+              <RegionStep selected={region} onSelect={setRegion} />
+            ) : (
+              <MoodStep selected={moods} onToggle={toggleMood} />
+            )}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       {step === 1 ? (
