@@ -80,7 +80,7 @@ export function RegionStep({ selected, onSelect }: RegionStepProps) {
                       {highlight(r.name, query)}
                     </span>
                     <span className="block text-[11px] text-muted-foreground">
-                      {r.gu}
+                      {highlight(r.gu, query)}
                       {r.description && ` · ${r.description}`}
                     </span>
                   </span>
