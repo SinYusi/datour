@@ -15,7 +15,8 @@ function first(value: string | string[] | undefined): string | undefined {
 
 export default async function ResultPage({ searchParams }: ResultPageProps) {
   const sp = await searchParams;
-  const region = first(sp.region) ? getRegionById(first(sp.region)!) : undefined;
+  const regionId = first(sp.region);
+  const region = regionId ? getRegionById(regionId) : undefined;
   const moodLabels = (first(sp.moods)?.split(",") ?? [])
     .map((id) => getMoodById(id)?.label)
     .filter((label): label is string => Boolean(label));
