@@ -21,30 +21,33 @@ export function CourseResult({ course, region, moodLabels }: CourseResultProps) 
   );
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 pt-4 pb-6">
-      <div className="flex items-center justify-between">
-        <Link
-          href="/"
-          aria-label="홈으로"
-          className="flex size-[30px] items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-        >
-          <ArrowLeft className="size-[17px]" />
-        </Link>
-        <span className="text-xs text-muted-foreground">
-          {region.name} · {moodLabels.join(" · ")}
-        </span>
-        <ThemeToggle />
+    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 pb-6">
+      {/* 지도 상단 고정: 아래 카드를 눌러도 지도 이동이 항상 보인다 */}
+      <div className="sticky top-0 z-10 bg-background pt-4 pb-3">
+        <div className="flex items-center justify-between">
+          <Link
+            href="/"
+            aria-label="홈으로"
+            className="flex size-[30px] items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            <ArrowLeft className="size-[17px]" />
+          </Link>
+          <span className="text-xs text-muted-foreground">
+            {region.name} · {moodLabels.join(" · ")}
+          </span>
+          <ThemeToggle />
+        </div>
+
+        <div className="mt-3">
+          <CourseMap
+            stops={course.stops}
+            activeId={activeId}
+            onSelect={setActiveId}
+          />
+        </div>
       </div>
 
-      <div className="mt-3">
-        <CourseMap
-          stops={course.stops}
-          activeId={activeId}
-          onSelect={setActiveId}
-        />
-      </div>
-
-      <h1 className="mt-4 text-lg font-bold tracking-[-0.02em] text-foreground">
+      <h1 className="mt-3 text-lg font-bold tracking-[-0.02em] text-foreground">
         {course.course_title}
       </h1>
       <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">
