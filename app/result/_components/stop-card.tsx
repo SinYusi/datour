@@ -1,3 +1,4 @@
+import type { Ref } from "react";
 import { Camera, Coffee, MapPin, UtensilsCrossed, type LucideIcon } from "lucide-react";
 import type { Stop } from "@/lib/types";
 
@@ -11,13 +12,15 @@ interface StopCardProps {
   stop: Stop;
   active?: boolean;
   onSelect?: () => void;
+  ref?: Ref<HTMLButtonElement>;
 }
 
-export function StopCard({ stop, active = false, onSelect }: StopCardProps) {
+export function StopCard({ stop, active = false, onSelect, ref }: StopCardProps) {
   const Icon = TYPE_ICON[stop.type];
 
   return (
     <button
+      ref={ref}
       type="button"
       onClick={onSelect}
       aria-pressed={active}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, RefreshCw } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -19,6 +19,16 @@ export function CourseResult({ course, region, moodLabels }: CourseResultProps) 
   const [activeId, setActiveId] = useState<string | null>(
     course.stops[0]?.place_id ?? null,
   );
+  const cardRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+
+  // 지도 핀 클릭: 카드 강조 + 해당 카드를 리스트 중앙으로 스크롤.
+  const handleMapSelect = (placeId: string) => {
+    setActiveId(placeId);
+    cardRefs.current[placeId]?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  };
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 pb-6">
@@ -42,7 +52,7 @@ export function CourseResult({ course, region, moodLabels }: CourseResultProps) 
           <CourseMap
             stops={course.stops}
             activeId={activeId}
-            onSelect={setActiveId}
+            onSelect={handleMapSelect}
           />
         </div>
       </div>
@@ -58,6 +68,9 @@ export function CourseResult({ course, region, moodLabels }: CourseResultProps) 
         {course.stops.map((stop) => (
           <StopCard
             key={stop.place_id}
+            ref={(el) => {
+              cardRefs.current[stop.place_id] = el;
+            }}
             stop={stop}
             active={activeId === stop.place_id}
             onSelect={() => setActiveId(stop.place_id)}
