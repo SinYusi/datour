@@ -17,11 +17,11 @@ export default async function ResultPage({ searchParams }: ResultPageProps) {
   const sp = await searchParams;
   const regionId = first(sp.region);
   const region = regionId ? getRegionById(regionId) : undefined;
-  const moodLabels = (first(sp.moods)?.split(",") ?? [])
-    .map((id) => getMoodById(id)?.label)
-    .filter((label): label is string => Boolean(label));
+  const moodIds = first(sp.moods)?.split(",").filter(Boolean) ?? [];
+  const moods = moodIds.map(getMoodById);
 
-  if (!region || moodLabels.length === 0) {
+  // 알 수 없는 mood id를 조용히 버리지 않고, 하나라도 무효하면 잘못된 접근으로 처리한다.
+  if (!region || moods.length === 0 || moods.some((m) => !m)) {
     return (
       <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col items-center justify-center gap-4 px-6 text-center">
         <p className="text-sm text-muted-foreground">
@@ -37,6 +37,7 @@ export default async function ResultPage({ searchParams }: ResultPageProps) {
     );
   }
 
+  const moodLabels = moods.map((m) => m!.label);
   const course = await generateCourse(region, moodLabels);
 
   return (
