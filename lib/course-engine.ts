@@ -5,6 +5,8 @@ import { searchKakao } from "./kakao-search";
 import type { Region } from "./regions";
 import type { Course, PlaceRaw, Stop } from "./types";
 
+const EXPECTED_TYPES: Stop["type"][] = ["식사", "카페", "액티비티"];
+
 export async function generateCourse(
   region: Region,
   moodLabels: string[],
@@ -58,25 +60,36 @@ ${JSON.stringify(toLite(액티비티Raw))}
     return JSON.parse(raw);
   };
 
+  // 코스 계약: 정확히 3곳, 각 place_id가 후보에 존재, 중복 없음, 식사/카페/액티비티 하나씩.
+  const isValid = (c: Course) => {
+    if (!c?.stops || c.stops.length !== EXPECTED_TYPES.length) return false;
+    const ids = new Set<string>();
+    for (const s of c.stops) {
+      if (!placeById[s.place_id] || ids.has(s.place_id)) return false;
+      ids.add(s.place_id);
+    }
+    return EXPECTED_TYPES.every((t) => c.stops.some((s) => s.type === t));
+  };
+
   let course = await callGemini();
-
-  // 검증: place_id가 후보 목록에 실제로 존재하는지 확인, 실패 시 1회 재시도
-  const isValid = (c: Course) => c.stops.every((s) => placeById[s.place_id]);
-
   if (!isValid(course)) {
-    course = await callGemini();
+    course = await callGemini(); // 1회 재시도
+  }
+  if (!isValid(course)) {
+    throw new Error(
+      "코스 생성 결과가 계약(정확히 3곳·유효 place_id·식사/카페/액티비티 각 1곳)을 충족하지 못했습니다.",
+    );
   }
 
-  // 재시도 후에도 유효하지 않으면, 좌표 조인에서 터지기 전에 명확히 실패시킨다.
-  if (!isValid(course)) {
-    throw new Error("코스 생성 결과에 유효하지 않은 place_id가 포함되어 있습니다.");
-  }
-
-  // 좌표 + 주소 + URL 붙이기 (LLM 출력 대신 카카오 원본 데이터 사용)
-  const stops: Stop[] = course.stops.map((s) => {
+  // 식사 → 카페 → 액티비티 순으로 정렬하고, 이름·좌표·주소·URL을 카카오 원본으로 조인.
+  // (LLM의 place_name은 신뢰하지 않고 place_id로 조인한 카카오 데이터로 덮어쓴다.)
+  const stops: Stop[] = EXPECTED_TYPES.map((type, i) => {
+    const s = course.stops.find((st) => st.type === type)!;
     const place = placeById[s.place_id];
     return {
       ...s,
+      order: i + 1,
+      place_name: place.name,
       lat: parseFloat(place.y),
       lng: parseFloat(place.x),
       address: place.address,
