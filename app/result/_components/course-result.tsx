@@ -19,7 +19,7 @@ export function CourseResult({ course, region, moodLabels }: CourseResultProps) 
   const [activeId, setActiveId] = useState<string | null>(
     course.stops[0]?.place_id ?? null,
   );
-  const cardRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const stickyRef = useRef<HTMLDivElement>(null);
 
   // 지도 핀 클릭: 카드 강조 + 상단 고정 지도에 가리지 않게, sticky 아래 보이는 영역 중앙으로 스크롤.
