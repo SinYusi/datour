@@ -46,6 +46,8 @@ export function CourseMap({ stops, activeId, onSelect }: CourseMapProps) {
 
   if (loading) return <MapFallback>지도 불러오는 중…</MapFallback>;
   if (error) return <MapFallback error>지도를 불러오지 못했어요.</MapFallback>;
+  // 빈 코스면 평균 좌표가 NaN이 되어 지도가 깨지므로 방어한다.
+  if (stops.length === 0) return <MapFallback>표시할 장소가 없어요.</MapFallback>;
 
   // 지도 중심: 세 장소의 평균 좌표
   const center = {
