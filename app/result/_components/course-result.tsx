@@ -6,6 +6,7 @@ import { ArrowLeft, RefreshCw } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import type { Course } from "@/lib/types";
 import type { Region } from "@/lib/regions";
+import { CourseMap } from "./course-map";
 import { StopCard } from "./stop-card";
 
 interface CourseResultProps {
@@ -33,6 +34,14 @@ export function CourseResult({ course, region, moodLabels }: CourseResultProps) 
           {region.name} · {moodLabels.join(" · ")}
         </span>
         <ThemeToggle />
+      </div>
+
+      <div className="mt-3">
+        <CourseMap
+          stops={course.stops}
+          activeId={activeId}
+          onSelect={setActiveId}
+        />
       </div>
 
       <h1 className="mt-4 text-lg font-bold tracking-[-0.02em] text-foreground">
