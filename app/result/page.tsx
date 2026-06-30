@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { getRegionById } from "@/lib/regions";
 import { getMoodById } from "@/lib/moods";
+import { generateCourse } from "@/lib/course-engine";
+import { CourseResult } from "./_components/course-result";
 
 interface ResultPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -12,35 +13,34 @@ function first(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
 }
 
-// 코스 생성·지도 렌더는 다음 슬라이스. 지금은 전달된 입력값만 확인한다.
 export default async function ResultPage({ searchParams }: ResultPageProps) {
   const sp = await searchParams;
   const regionId = first(sp.region);
-  const moodsParam = first(sp.moods);
   const region = regionId ? getRegionById(regionId) : undefined;
-  const moodLabels = (moodsParam ? moodsParam.split(",") : [])
-    .map((id) => getMoodById(id)?.label)
-    .filter(Boolean)
-    .join(", ");
+  const moodIds = first(sp.moods)?.split(",").filter(Boolean) ?? [];
+  const moods = moodIds.map(getMoodById);
+
+  // 알 수 없는 mood id를 조용히 버리지 않고, 하나라도 무효하면 잘못된 접근으로 처리한다.
+  if (!region || moods.length === 0 || moods.some((m) => !m)) {
+    return (
+      <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col items-center justify-center gap-4 px-6 text-center">
+        <p className="text-sm text-muted-foreground">
+          조건이 올바르지 않아요. 다시 골라주세요.
+        </p>
+        <Link
+          href="/create"
+          className="text-sm font-medium text-brand-text hover:underline"
+        >
+          조건 고르기
+        </Link>
+      </main>
+    );
+  }
+
+  const moodLabels = moods.map((m) => m!.label);
+  const course = await generateCourse(region, moodLabels);
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col items-center justify-center gap-4 px-6 text-center">
-      <p className="text-sm text-muted-foreground">
-        결과 화면은 다음 슬라이스에서 만들어요.
-      </p>
-      <div className="rounded-xl border border-border px-4 py-3 text-sm">
-        <span className="font-semibold text-foreground">
-          {region?.name ?? regionId ?? "-"}
-        </span>
-        <span className="text-muted-foreground"> · {moodLabels || "-"}</span>
-      </div>
-      <Link
-        href="/create"
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-text hover:underline"
-      >
-        <ArrowLeft className="size-4" />
-        조건 다시 고르기
-      </Link>
-    </main>
+    <CourseResult course={course} region={region} moodLabels={moodLabels} />
   );
 }

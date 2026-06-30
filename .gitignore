@@ -43,7 +43,6 @@ next-env.d.ts
 # projects-specific
 CLAUDE.md
 PLAN.md
-/prompts/
 course-test.mjs
 
 # claude code (local-only subagents)
