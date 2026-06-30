@@ -67,6 +67,11 @@ ${JSON.stringify(toLite(액티비티Raw))}
     course = await callGemini();
   }
 
+  // 재시도 후에도 유효하지 않으면, 좌표 조인에서 터지기 전에 명확히 실패시킨다.
+  if (!isValid(course)) {
+    throw new Error("코스 생성 결과에 유효하지 않은 place_id가 포함되어 있습니다.");
+  }
+
   // 좌표 + 주소 + URL 붙이기 (LLM 출력 대신 카카오 원본 데이터 사용)
   const stops: Stop[] = course.stops.map((s) => {
     const place = placeById[s.place_id];
