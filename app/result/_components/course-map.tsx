@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   CustomOverlayMap,
   Map,
@@ -34,6 +35,14 @@ export function CourseMap({ stops, activeId, onSelect }: CourseMapProps) {
   const [loading, error] = useKakaoLoader({
     appkey: process.env.NEXT_PUBLIC_KAKAO_JS_KEY!,
   });
+  const [map, setMap] = useState<kakao.maps.Map | null>(null);
+
+  // 선택된 스톱이 바뀌면 그 마커로 부드럽게 이동.
+  useEffect(() => {
+    if (!map || !activeId) return;
+    const stop = stops.find((s) => s.place_id === activeId);
+    if (stop) map.panTo(new kakao.maps.LatLng(stop.lat, stop.lng));
+  }, [map, activeId, stops]);
 
   if (loading) return <MapFallback>지도 불러오는 중…</MapFallback>;
   if (error) return <MapFallback error>지도를 불러오지 못했어요.</MapFallback>;
@@ -47,7 +56,12 @@ export function CourseMap({ stops, activeId, onSelect }: CourseMapProps) {
 
   return (
     <div className="overflow-hidden rounded-2xl border border-border">
-      <Map center={center} level={5} style={{ width: "100%", height: "220px" }}>
+      <Map
+        center={center}
+        level={5}
+        style={{ width: "100%", height: "220px" }}
+        onCreate={setMap}
+      >
         <Polyline
           path={path}
           strokeWeight={3}
