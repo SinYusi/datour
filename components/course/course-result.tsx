@@ -14,8 +14,8 @@ interface CourseResultProps {
   course: Course;
   region: Region;
   moodLabels: string[];
-  /** 공유 링크(/c/[id])를 만들 저장 코스 id */
-  shareId: string;
+  /** 공유 링크(/c/[id])를 만들 저장 코스 id. 저장 실패 시 없을 수 있다. */
+  shareId?: string | null;
   /** 공유 링크로 열람 중인지 (하단 CTA가 달라진다) */
   shared?: boolean;
 }
@@ -100,7 +100,7 @@ export function CourseResult({
       </div>
 
       <div className="mt-4 flex flex-col gap-2.5">
-        <ShareButton shareId={shareId} />
+        {shareId && <ShareButton shareId={shareId} />}
         <Link
           href={shared ? "/" : "/create"}
           className="flex w-full items-center justify-center gap-2 rounded-xl border border-border py-3.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted"

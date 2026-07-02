@@ -40,8 +40,14 @@ export default async function ResultPage({ searchParams }: ResultPageProps) {
 
   const moodLabels = moods.map((m) => m!.label);
   const course = await generateCourse(region, moodLabels);
-  // 생성된 코스를 저장해 고정 스냅샷 공유 링크(/c/[id])를 만든다.
-  const shareId = await saveCourse(region.id, moodIds, course);
+
+  // 저장은 부가 기능이라 실패해도 결과는 보여준다 (공유 버튼만 숨김).
+  let shareId: string | null = null;
+  try {
+    shareId = await saveCourse(region.id, moodIds, course);
+  } catch (e) {
+    console.error("코스 저장 실패 (공유 비활성):", e);
+  }
 
   return (
     <CourseResult
