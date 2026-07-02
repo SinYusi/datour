@@ -19,9 +19,14 @@ export async function generateMetadata({
   if (!UUID_RE.test(id)) return {};
   const saved = await getCourseById(id);
   if (!saved) return {};
+
+  const title = `${saved.course.course_title} · Datour`;
+  const description = saved.course.summary;
   return {
-    title: `${saved.course.course_title} · Datour`,
-    description: saved.course.summary,
+    title,
+    description,
+    openGraph: { title, description, type: "website" },
+    twitter: { card: "summary", title, description },
   };
 }
 
