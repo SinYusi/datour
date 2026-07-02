@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getRegionById } from "@/lib/regions";
 import { getMoodById } from "@/lib/moods";
 import { generateCourse } from "@/lib/course-engine";
+import { saveCourse } from "@/lib/courses";
 import { CourseResult } from "@/components/course/course-result";
 
 interface ResultPageProps {
@@ -39,8 +40,15 @@ export default async function ResultPage({ searchParams }: ResultPageProps) {
 
   const moodLabels = moods.map((m) => m!.label);
   const course = await generateCourse(region, moodLabels);
+  // 생성된 코스를 저장해 고정 스냅샷 공유 링크(/c/[id])를 만든다.
+  const shareId = await saveCourse(region.id, moodIds, course);
 
   return (
-    <CourseResult course={course} region={region} moodLabels={moodLabels} />
+    <CourseResult
+      course={course}
+      region={region}
+      moodLabels={moodLabels}
+      shareId={shareId}
+    />
   );
 }
