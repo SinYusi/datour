@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getRegionById } from "@/lib/regions";
 import { getMoodById } from "@/lib/moods";
 import { generateCourse } from "@/lib/course-engine";
-import { CourseResult } from "./_components/course-result";
+import { CourseResult } from "@/components/course/course-result";
 
 interface ResultPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
