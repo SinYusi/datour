@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { createClient } from "@supabase/supabase-js";
 import type { Course } from "./types";
 
@@ -36,20 +37,25 @@ export async function saveCourse(
   return data.id as string;
 }
 
-/** 저장된 코스를 id로 조회한다. 없으면 null. */
-export async function getCourseById(id: string): Promise<SavedCourse | null> {
-  const { data, error } = await readClient()
-    .from("courses")
-    .select("region_id, mood_ids, course")
-    .eq("id", id)
-    .maybeSingle();
+/**
+ * 저장된 코스를 id로 조회한다. 없으면 null.
+ * 같은 요청에서 page·generateMetadata가 함께 호출하므로 cache로 중복 조회를 막는다.
+ */
+export const getCourseById = cache(
+  async (id: string): Promise<SavedCourse | null> => {
+    const { data, error } = await readClient()
+      .from("courses")
+      .select("region_id, mood_ids, course")
+      .eq("id", id)
+      .maybeSingle();
 
-  if (error) throw new Error(`코스 조회 실패: ${error.message}`);
-  if (!data) return null;
+    if (error) throw new Error(`코스 조회 실패: ${error.message}`);
+    if (!data) return null;
 
-  return {
-    regionId: data.region_id as string,
-    moodIds: (data.mood_ids as string[]) ?? [],
-    course: data.course as Course,
-  };
-}
+    return {
+      regionId: data.region_id as string,
+      moodIds: (data.mood_ids as string[]) ?? [],
+      course: data.course as Course,
+    };
+  },
+);
