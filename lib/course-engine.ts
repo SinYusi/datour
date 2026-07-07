@@ -31,6 +31,12 @@ export async function generateCourse(
     [...식사Raw, ...카페Raw, ...액티비티Raw].map((p) => [p.id, p]),
   );
 
+  // place_id → 실제 카카오 카테고리. LLM이 보고한 type을 신뢰하지 않고 이걸로 덮어쓴다.
+  const typeById: Record<string, Stop["type"]> = {};
+  for (const p of 식사Raw) typeById[p.id] = "식사";
+  for (const p of 카페Raw) typeById[p.id] = "카페";
+  for (const p of 액티비티Raw) typeById[p.id] = "액티비티";
+
   // 좌표(x,y)도 후보에 넣어 LLM이 세 곳을 가까운 조합으로 고르게 한다.
   const toLite = (arr: PlaceRaw[]) =>
     arr.map(({ id, name, category, address, x, y }) => ({
@@ -79,7 +85,9 @@ ${JSON.stringify(toLite(액티비티Raw))}
     }
     const orders = new Set(c.stops.map((s) => s.order));
     if (orders.size !== EXPECTED_TYPES.length) return false;
-    return EXPECTED_TYPES.every((t) => c.stops.some((s) => s.type === t));
+    // 실제 카테고리(typeById) 기준으로 식사·카페·액티비티가 하나씩인지 확인.
+    const trueTypes = c.stops.map((s) => typeById[s.place_id]);
+    return EXPECTED_TYPES.every((t) => trueTypes.includes(t));
   };
 
   let course = await callGemini();
@@ -100,6 +108,7 @@ ${JSON.stringify(toLite(액티비티Raw))}
       const place = placeById[s.place_id];
       return {
         ...s,
+        type: typeById[s.place_id],
         order: i + 1,
         place_name: place.name,
         lat: parseFloat(place.y),
