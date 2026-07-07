@@ -3,7 +3,20 @@ import { getRegionById } from "@/lib/regions";
 import { getMoodById } from "@/lib/moods";
 import { generateCourse } from "@/lib/course-engine";
 import { saveCourse } from "@/lib/courses";
+import {
+  TIME_DEFAULT,
+  TIME_MAX,
+  TIME_MIN,
+  formatTimeRange,
+  periodLabel,
+} from "@/lib/time";
+import { BUDGETS, getBudgetById } from "@/lib/budgets";
 import { CourseResult } from "@/components/course/course-result";
+
+function parseHour(value: string | undefined, fallback: number): number {
+  const n = Number(value);
+  return Number.isInteger(n) && n >= TIME_MIN && n <= TIME_MAX ? n : fallback;
+}
 
 interface ResultPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -39,7 +52,18 @@ export default async function ResultPage({ searchParams }: ResultPageProps) {
   }
 
   const moodLabels = moods.map((m) => m!.label);
-  const course = await generateCourse(region, moodLabels);
+
+  // 시간대·예산은 부가 조건 — 없거나 이상하면 기본값으로 (생성은 계속되게).
+  const start = parseHour(first(sp.start), TIME_DEFAULT[0]);
+  const endRaw = parseHour(first(sp.end), TIME_DEFAULT[1]);
+  const end = endRaw > start ? endRaw : TIME_DEFAULT[1];
+  const budget =
+    getBudgetById(first(sp.budget) ?? "") ??
+    BUDGETS.find((b) => b.id === "moderate")!;
+
+  const timeText = `${periodLabel(start)} (${formatTimeRange(start, end)})`;
+  const budgetText = `${budget.label} (${budget.description})`;
+  const course = await generateCourse(region, moodLabels, timeText, budgetText);
 
   // 저장은 부가 기능이라 실패해도 결과는 보여준다 (공유 버튼만 숨김).
   let shareId: string | null = null;

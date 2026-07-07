@@ -11,6 +11,8 @@ const EXPECTED_TYPES: Stop["type"][] = ["식사", "카페", "액티비티"];
 export async function generateCourse(
   region: Region,
   moodLabels: string[],
+  timeText: string,
+  budgetText: string,
 ): Promise<Course> {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
@@ -41,6 +43,8 @@ export async function generateCourse(
 [사용자 조건]
 - 지역: ${region.name}
 - 분위기: ${moodLabels.join(", ")}
+- 시간대: ${timeText}
+- 예산: ${budgetText}
 
 [식사 후보]
 ${JSON.stringify(toLite(식사Raw))}
