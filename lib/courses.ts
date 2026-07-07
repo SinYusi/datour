@@ -19,6 +19,9 @@ export interface SavedCourse {
   regionId: string;
   moodIds: string[];
   course: Course;
+  timeStart: number | null;
+  timeEnd: number | null;
+  budgetId: string | null;
 }
 
 /** 생성된 코스를 저장하고 공유용 id(uuid)를 돌려준다. */
@@ -26,10 +29,20 @@ export async function saveCourse(
   regionId: string,
   moodIds: string[],
   course: Course,
+  timeStart: number,
+  timeEnd: number,
+  budgetId: string,
 ): Promise<string> {
   const { data, error } = await writeClient()
     .from("courses")
-    .insert({ region_id: regionId, mood_ids: moodIds, course })
+    .insert({
+      region_id: regionId,
+      mood_ids: moodIds,
+      course,
+      time_start: timeStart,
+      time_end: timeEnd,
+      budget: budgetId,
+    })
     .select("id")
     .single();
 
@@ -45,7 +58,7 @@ export const getCourseById = cache(
   async (id: string): Promise<SavedCourse | null> => {
     const { data, error } = await readClient()
       .from("courses")
-      .select("region_id, mood_ids, course")
+      .select("region_id, mood_ids, course, time_start, time_end, budget")
       .eq("id", id)
       .maybeSingle();
 
@@ -56,6 +69,9 @@ export const getCourseById = cache(
       regionId: data.region_id as string,
       moodIds: (data.mood_ids as string[]) ?? [],
       course: data.course as Course,
+      timeStart: (data.time_start as number | null) ?? null,
+      timeEnd: (data.time_end as number | null) ?? null,
+      budgetId: (data.budget as string | null) ?? null,
     };
   },
 );

@@ -9,6 +9,7 @@ import {
   TIME_MIN,
   formatTimeRange,
   periodLabel,
+  periodShort,
 } from "@/lib/time";
 import { BUDGETS, getBudgetById } from "@/lib/budgets";
 import { CourseResult } from "@/components/course/course-result";
@@ -68,7 +69,7 @@ export default async function ResultPage({ searchParams }: ResultPageProps) {
   // 저장은 부가 기능이라 실패해도 결과는 보여준다 (공유 버튼만 숨김).
   let shareId: string | null = null;
   try {
-    shareId = await saveCourse(region.id, moodIds, course);
+    shareId = await saveCourse(region.id, moodIds, course, start, end, budget.id);
   } catch (e) {
     console.error("코스 저장 실패 (공유 비활성):", e);
   }
@@ -78,6 +79,8 @@ export default async function ResultPage({ searchParams }: ResultPageProps) {
       course={course}
       region={region}
       moodLabels={moodLabels}
+      timeLabel={periodShort(start)}
+      budgetLabel={budget.label}
       shareId={shareId}
     />
   );

@@ -4,11 +4,16 @@ export const TIME_MAX = 24;
 export const TIME_MIN_DURATION = 2;
 export const TIME_DEFAULT: [number, number] = [18, 22];
 
+/** 시작 시각으로 짧은 시간대 라벨(낮/저녁/밤)을 파생한다. */
+export function periodShort(startHour: number): string {
+  if (startHour < 17) return "낮";
+  if (startHour < 20) return "저녁";
+  return "밤";
+}
+
 /** 시작 시각으로 시간대 라벨을 파생한다. */
 export function periodLabel(startHour: number): string {
-  if (startHour < 17) return "낮 데이트";
-  if (startHour < 20) return "저녁 데이트";
-  return "밤 데이트";
+  return `${periodShort(startHour)} 데이트`;
 }
 
 function num12(hour: number): number {
