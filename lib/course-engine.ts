@@ -31,12 +31,15 @@ export async function generateCourse(
     [...식사Raw, ...카페Raw, ...액티비티Raw].map((p) => [p.id, p]),
   );
 
+  // 좌표(x,y)도 후보에 넣어 LLM이 세 곳을 가까운 조합으로 고르게 한다.
   const toLite = (arr: PlaceRaw[]) =>
-    arr.map(({ id, name, category, address }) => ({
+    arr.map(({ id, name, category, address, x, y }) => ({
       id,
       name,
       category,
       address,
+      x,
+      y,
     }));
 
   const userMessage = `
@@ -65,7 +68,8 @@ ${JSON.stringify(toLite(액티비티Raw))}
     return JSON.parse(raw);
   };
 
-  // 코스 계약: 정확히 3곳, 각 place_id가 후보에 존재, 중복 없음, 식사/카페/액티비티 하나씩.
+  // 코스 계약: 정확히 3곳, 각 place_id가 후보에 존재, 중복 없음, 식사/카페/액티비티 하나씩,
+  // order가 서로 겹치지 않음(방문 순서 정렬용).
   const isValid = (c: Course) => {
     if (!c?.stops || c.stops.length !== EXPECTED_TYPES.length) return false;
     const ids = new Set<string>();
@@ -73,6 +77,8 @@ ${JSON.stringify(toLite(액티비티Raw))}
       if (!placeById[s.place_id] || ids.has(s.place_id)) return false;
       ids.add(s.place_id);
     }
+    const orders = new Set(c.stops.map((s) => s.order));
+    if (orders.size !== EXPECTED_TYPES.length) return false;
     return EXPECTED_TYPES.every((t) => c.stops.some((s) => s.type === t));
   };
 
@@ -86,21 +92,22 @@ ${JSON.stringify(toLite(액티비티Raw))}
     );
   }
 
-  // 식사 → 카페 → 액티비티 순으로 정렬하고, 이름·좌표·주소·URL을 카카오 원본으로 조인.
-  // (LLM의 place_name은 신뢰하지 않고 place_id로 조인한 카카오 데이터로 덮어쓴다.)
-  const stops: Stop[] = EXPECTED_TYPES.map((type, i) => {
-    const s = course.stops.find((st) => st.type === type)!;
-    const place = placeById[s.place_id];
-    return {
-      ...s,
-      order: i + 1,
-      place_name: place.name,
-      lat: parseFloat(place.y),
-      lng: parseFloat(place.x),
-      address: place.address,
-      url: place.url,
-    };
-  });
+  // LLM이 시간대에 맞게 정한 order대로 방문 순서를 정렬하고, 이름·좌표·주소·URL은
+  // 카카오 원본으로 조인. (place_name은 LLM 출력이 아니라 place_id로 조인한 값으로 덮어쓴다.)
+  const stops: Stop[] = [...course.stops]
+    .sort((a, b) => a.order - b.order)
+    .map((s, i) => {
+      const place = placeById[s.place_id];
+      return {
+        ...s,
+        order: i + 1,
+        place_name: place.name,
+        lat: parseFloat(place.y),
+        lng: parseFloat(place.x),
+        address: place.address,
+        url: place.url,
+      };
+    });
 
   return { ...course, stops };
 }
