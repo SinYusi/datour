@@ -9,11 +9,13 @@ import { StepProgress } from "./_components/step-progress";
 import { RegionStep } from "./_components/region-step";
 import { MoodStep } from "./_components/mood-step";
 import { TimeStep } from "./_components/time-step";
+import { BudgetStep } from "./_components/budget-step";
 import type { Region } from "@/lib/regions";
 import type { Mood } from "@/lib/moods";
+import type { Budget } from "@/lib/budgets";
 import { TIME_DEFAULT } from "@/lib/time";
 
-const TOTAL_STEPS = 3;
+const TOTAL_STEPS = 4;
 
 export default function CreatePage() {
   const router = useRouter();
@@ -21,13 +23,20 @@ export default function CreatePage() {
   const [region, setRegion] = useState<Region | null>(null);
   const [moods, setMoods] = useState<Mood[]>([]);
   const [time, setTime] = useState<[number, number]>(TIME_DEFAULT);
+  const [budget, setBudget] = useState<Budget | null>(null);
 
   const isFirst = step === 1;
   const isLast = step === TOTAL_STEPS;
 
   // 현재 단계에서 다음/제출로 넘어갈 수 있는지
   const canProceed =
-    step === 1 ? region !== null : step === 2 ? moods.length > 0 : true;
+    step === 1
+      ? region !== null
+      : step === 2
+        ? moods.length > 0
+        : step === 4
+          ? budget !== null
+          : true;
 
   const handleBack = () => {
     if (step > 1) setStep((s) => s - 1);
@@ -44,12 +53,13 @@ export default function CreatePage() {
 
   // 입력값을 쿼리 파라미터(ASCII id)로 실어 결과 화면으로 이동.
   const handleSubmit = () => {
-    if (!region || moods.length === 0) return;
+    if (!region || moods.length === 0 || !budget) return;
     const params = new URLSearchParams({
       region: region.id,
       moods: moods.map((m) => m.id).join(","),
       start: String(time[0]),
       end: String(time[1]),
+      budget: budget.id,
     });
     router.push(`/result?${params.toString()}`);
   };
@@ -91,8 +101,10 @@ export default function CreatePage() {
               <RegionStep selected={region} onSelect={setRegion} />
             ) : step === 2 ? (
               <MoodStep selected={moods} onToggle={toggleMood} />
-            ) : (
+            ) : step === 3 ? (
               <TimeStep value={time} onChange={setTime} />
+            ) : (
+              <BudgetStep selected={budget} onSelect={setBudget} />
             )}
           </motion.div>
         </AnimatePresence>
