@@ -8,14 +8,25 @@ import type { Course } from "@/lib/types";
 import type { Region } from "@/lib/regions";
 import { CourseMap } from "./course-map";
 import { StopCard } from "./stop-card";
+import { ShareButton } from "./share-button";
 
 interface CourseResultProps {
   course: Course;
   region: Region;
   moodLabels: string[];
+  /** 공유 링크(/c/[id])를 만들 저장 코스 id. 저장 실패 시 없을 수 있다. */
+  shareId?: string | null;
+  /** 공유 링크로 열람 중인지 (하단 CTA가 달라진다) */
+  shared?: boolean;
 }
 
-export function CourseResult({ course, region, moodLabels }: CourseResultProps) {
+export function CourseResult({
+  course,
+  region,
+  moodLabels,
+  shareId,
+  shared = false,
+}: CourseResultProps) {
   const [activeId, setActiveId] = useState<string | null>(
     course.stops[0]?.place_id ?? null,
   );
@@ -88,13 +99,16 @@ export function CourseResult({ course, region, moodLabels }: CourseResultProps) 
         ))}
       </div>
 
-      <Link
-        href="/create"
-        className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-border py-3.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted"
-      >
-        <RefreshCw className="size-4" />
-        다른 코스 만들기
-      </Link>
+      <div className="mt-4 flex flex-col gap-2.5">
+        {shareId && <ShareButton shareId={shareId} />}
+        <Link
+          href={shared ? "/" : "/create"}
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-border py-3.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted"
+        >
+          <RefreshCw className="size-4" />
+          {shared ? "나도 코스 만들기" : "다른 코스 만들기"}
+        </Link>
+      </div>
     </main>
   );
 }

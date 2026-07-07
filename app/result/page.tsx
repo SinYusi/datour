@@ -2,7 +2,8 @@ import Link from "next/link";
 import { getRegionById } from "@/lib/regions";
 import { getMoodById } from "@/lib/moods";
 import { generateCourse } from "@/lib/course-engine";
-import { CourseResult } from "./_components/course-result";
+import { saveCourse } from "@/lib/courses";
+import { CourseResult } from "@/components/course/course-result";
 
 interface ResultPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -40,7 +41,20 @@ export default async function ResultPage({ searchParams }: ResultPageProps) {
   const moodLabels = moods.map((m) => m!.label);
   const course = await generateCourse(region, moodLabels);
 
+  // 저장은 부가 기능이라 실패해도 결과는 보여준다 (공유 버튼만 숨김).
+  let shareId: string | null = null;
+  try {
+    shareId = await saveCourse(region.id, moodIds, course);
+  } catch (e) {
+    console.error("코스 저장 실패 (공유 비활성):", e);
+  }
+
   return (
-    <CourseResult course={course} region={region} moodLabels={moodLabels} />
+    <CourseResult
+      course={course}
+      region={region}
+      moodLabels={moodLabels}
+      shareId={shareId}
+    />
   );
 }
