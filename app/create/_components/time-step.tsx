@@ -5,6 +5,7 @@ import {
   TIME_MAX,
   TIME_MIN,
   TIME_MIN_DURATION,
+  formatHour,
   formatTimeRange,
   periodLabel,
 } from "@/lib/time";
@@ -66,10 +67,12 @@ export function TimeStep({ value, onChange }: TimeStepProps) {
           </Slider.Track>
           <Slider.Thumb
             aria-label="시작 시각"
+            aria-valuetext={formatHour(start)}
             className="block size-[22px] rounded-full border-2 border-brand bg-background shadow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
           />
           <Slider.Thumb
             aria-label="종료 시각"
+            aria-valuetext={formatHour(end)}
             className="block size-[22px] rounded-full border-2 border-brand bg-background shadow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
           />
         </Slider.Root>
