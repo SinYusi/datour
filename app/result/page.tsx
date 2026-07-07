@@ -7,6 +7,7 @@ import {
   TIME_DEFAULT,
   TIME_MAX,
   TIME_MIN,
+  TIME_MIN_DURATION,
   formatTimeRange,
   periodLabel,
   periodShort,
@@ -54,10 +55,11 @@ export default async function ResultPage({ searchParams }: ResultPageProps) {
 
   const moodLabels = moods.map((m) => m!.label);
 
-  // 시간대·예산은 부가 조건 — 없거나 이상하면 기본값으로 (생성은 계속되게).
-  const start = parseHour(first(sp.start), TIME_DEFAULT[0]);
-  const endRaw = parseHour(first(sp.end), TIME_DEFAULT[1]);
-  const end = endRaw > start ? endRaw : TIME_DEFAULT[1];
+  // 시간대·예산은 부가 조건 — 값이 없거나 조작돼도 범위·최소 지속시간을 항상 보장한다.
+  let start = parseHour(first(sp.start), TIME_DEFAULT[0]);
+  start = Math.min(start, TIME_MAX - TIME_MIN_DURATION);
+  let end = parseHour(first(sp.end), TIME_DEFAULT[1]);
+  end = Math.min(Math.max(end, start + TIME_MIN_DURATION), TIME_MAX);
   const budget =
     getBudgetById(first(sp.budget) ?? "") ??
     BUDGETS.find((b) => b.id === "moderate")!;
