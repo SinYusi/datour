@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { getCourseById } from "@/lib/courses";
 import { getRegionById } from "@/lib/regions";
 import { getMoodById } from "@/lib/moods";
+import { getBudgetById } from "@/lib/budgets";
+import { periodShort } from "@/lib/time";
 import { CourseResult } from "@/components/course/course-result";
 
 interface SharePageProps {
@@ -41,12 +43,19 @@ export default async function SharePage({ params }: SharePageProps) {
   const moodLabels = saved.moodIds
     .map((mid) => getMoodById(mid)?.label)
     .filter((label): label is string => Boolean(label));
+  const timeLabel =
+    saved.timeStart !== null ? periodShort(saved.timeStart) : undefined;
+  const budgetLabel = saved.budgetId
+    ? getBudgetById(saved.budgetId)?.label
+    : undefined;
 
   return (
     <CourseResult
       course={saved.course}
       region={region}
       moodLabels={moodLabels}
+      timeLabel={timeLabel}
+      budgetLabel={budgetLabel}
       shareId={id}
       shared
     />

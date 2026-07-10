@@ -14,6 +14,10 @@ interface CourseResultProps {
   course: Course;
   region: Region;
   moodLabels: string[];
+  /** 짧은 시간대 라벨 (낮/저녁/밤) */
+  timeLabel?: string | null;
+  /** 예산 라벨 (가볍게/적당히/특별하게) */
+  budgetLabel?: string | null;
   /** 공유 링크(/c/[id])를 만들 저장 코스 id. 저장 실패 시 없을 수 있다. */
   shareId?: string | null;
   /** 공유 링크로 열람 중인지 (하단 CTA가 달라진다) */
@@ -24,9 +28,14 @@ export function CourseResult({
   course,
   region,
   moodLabels,
+  timeLabel,
+  budgetLabel,
   shareId,
   shared = false,
 }: CourseResultProps) {
+  const summary = [region.name, ...moodLabels, timeLabel, budgetLabel]
+    .filter(Boolean)
+    .join(" · ");
   const [activeId, setActiveId] = useState<string | null>(
     course.stops[0]?.place_id ?? null,
   );
@@ -63,8 +72,8 @@ export function CourseResult({
           >
             <ArrowLeft className="size-[17px]" />
           </Link>
-          <span className="text-xs text-muted-foreground">
-            {region.name} · {moodLabels.join(" · ")}
+          <span className="min-w-0 flex-1 truncate px-2 text-center text-xs text-muted-foreground">
+            {summary}
           </span>
           <ThemeToggle />
         </div>
